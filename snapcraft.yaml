@@ -1,0 +1,29 @@
+name: influxdb-cprov
+version: 1.3.7
+summary: An Open-Source Time Series Database
+description: |
+  InfluxDB is an open source time series database with no external dependencies.
+  It's useful for recording metrics, events, and performing analytics.
+confinement: devmode
+grade: devel
+
+apps:
+  influxdb:
+    command: bin/influxd
+    plugs: [network, network-bind]
+
+parts:
+  go:
+    source-tag: go1.9.2
+  influxdb:
+    after: [go]
+    plugin: go
+    go-packages:
+      - github.com/sparrc/gdm
+      - github.com/influxdata/influxdb
+    install: |
+      cd $GOPATH/src/github.com/influxdata/influxdb && $GOPATH/bin/gdm restore
+      cd $GOPATH/src/github.com/influxdata/influxdb && go get ./...
+      cd $GOPATH/src/github.com/influxdata/influxdb && go install ./...
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin/
+      cp $GOPATH/bin/influxd $SNAPCRAFT_PART_INSTALL/bin/
